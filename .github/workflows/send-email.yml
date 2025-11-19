@@ -17,7 +17,7 @@ jobs:
           password: ${{ secrets.MAIL_PASSWORD }}
           subject: "Giscus 有新评论！"
           to: "2396768163@qq.com"
-          from: "GitHub Actions <2396768163@qq.com.com>"
+          from: "Giscus <${{ secrets.MAIL_USERNAME }}>"
           body: |
             来自 Giscus 的新评论：
             讨论标题：${{ github.event.discussion.title }}
