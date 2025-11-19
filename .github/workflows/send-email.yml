@@ -20,7 +20,7 @@ jobs:
         with:
           server_address: smtp.qq.com
           server_port: 465
-          mime_type: text/html
+          content_type: text/html
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
           subject: "博客有新评论！"
