@@ -8,6 +8,7 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
+      
       - name: Convert UTC to Beijing Time
         id: time
         run: |
@@ -15,54 +16,34 @@ jobs:
           BJ_TIME=$(date -d "$UTC_TIME 8 hour" "+%Y-%m-%d %H:%M:%S")
           echo "bj=$BJ_TIME" >> $GITHUB_OUTPUT
 
-      # 添加escape步骤或移除对它的引用
+      
       - name: Escape HTML characters
         id: escape
         run: |
           COMMENT_BODY=$(echo '${{ github.event.comment.body }}' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
           echo "comment_body=$COMMENT_BODY" >> $GITHUB_OUTPUT
 
+      
+      - name: Prepare email HTML
+        run: |
+          cp template.html email.html
+          sed -i "s|{{BJ_TIME}}|${{ steps.time.outputs.bj }}|g" email.html
+          sed -i "s|{{COMMENT_BODY}}|${{ steps.escape.outputs.comment_body }}|g" email.html
+          sed -i "s|{{COMMENT_USER}}|${{ github.event.comment.user.login }}|g" email.html
+          sed -i "s|{{DISCUSSION_URL}}|${{ github.event.comment.html_url }}|g" email.html
+          sed -i "s|{{BLOG_URL}}|${{ secrets.BLOG_BASE_URL }}${{ github.event.discussion.title }}|g" email.html
+
+      
       - name: Send email
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.qq.com
           server_port: 465
-          # 修复content_type设置
-          content_type: text/html; charset=utf-8
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
           subject: "博客有新评论！"
           to: "2396768163@qq.com"
           from: "Giscus <${{ secrets.MAIL_USERNAME }}>"
-          # 移除可能干扰的headers
-          # headers: "Time:${{ steps.time.outputs.bj }}"
-          body: |
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-            </head>
-            <body>
-                <div style="text-align:center; font-size:22px; font-weight:bold; margin-bottom:20px;">
-                  来自博客的新评论
-                </div>
 
-                <div style="font-size:16px; line-height:1.6;">
-                  <p><strong>评论时间（北京时间）：</strong> ${{ steps.time.outputs.bj }}</p>
-
-                  <p><strong>评论地址：</strong>
-                  <a href="${{ secrets.BLOG_BASE_URL }}${{ github.event.discussion.title }}">
-                  ${{ secrets.BLOG_BASE_URL }}${{ github.event.discussion.title }}</a></p>
-
-                  <p><strong>评论内容：</strong><br>
-                  ${{ steps.escape.outputs.comment_body }}</p>
-
-                  <p><strong>评论人：</strong>
-                  ${{ github.event.comment.user.login }}</p>
-
-                  <p><strong>评论链接：</strong>
-                  <a href="${{ github.event.comment.html_url }}">
-                  ${{ github.event.comment.html_url }}</a></p>
-                </div>
-            </body>
-            </html>
+          # 直接读取生成好的 HTML 文件
+          html_body: file://email.html
