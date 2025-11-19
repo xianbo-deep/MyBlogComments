@@ -6,70 +6,110 @@
     <style>
         body {
             font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-            background-color: #f4f6f8;
+            background-color: #f5f7fa;
             margin: 0;
-            padding: 30px 0;
+            padding: 0;
         }
         .container {
-            max-width: 650px;
-            margin: auto;
+            width: 100%;
+            padding: 30px 15px;
+            display: flex;
+            justify-content: center;
         }
         .card {
-            background: #ffffff;
+            max-width: 650px;
+            background-color: #ffffff;
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 6px 25px rgba(0,0,0,0.08);
             padding: 30px 25px;
             color: #333333;
-            line-height: 1.6;
         }
         .header {
-            text-align: center;
-            font-size: 26px;
+            font-size: 28px;
             font-weight: 700;
             color: #1a73e8;
+            text-align: center;
             margin-bottom: 25px;
         }
         .field {
-            margin-bottom: 18px;
+            margin-bottom: 20px;
             font-size: 16px;
         }
         .field strong {
             display: inline-block;
-            width: 130px;
+            width: 100px;
             color: #555555;
         }
-        a {
-            color: #1a73e8;
-            text-decoration: none;
+        .content {
+            background: #f4f6f8;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 8px;
+            line-height: 1.6;
+            word-break: break-word;
         }
-        a:hover {
-            text-decoration: underline;
+        .button {
+            display: inline-block;
+            padding: 12px 22px;
+            margin-top: 10px;
+            background-color: #1a73e8;
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background 0.2s ease;
+        }
+        .button:hover {
+            background-color: #155ab6;
         }
         .divider {
             border-top: 1px solid #e0e0e0;
-            margin: 20px 0;
+            margin: 25px 0;
         }
         .footer {
-            text-align: center;
-            font-size: 14px;
+            font-size: 13px;
             color: #999999;
-            margin-top: 20px;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .card {
+                padding: 20px 15px;
+            }
+            .header {
+                font-size: 24px;
+            }
+            .field strong {
+                width: 90px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="card">
-            <div class="header">💬 来自博客的新评论</div>
+            <div class="header">博客新评论通知</div>
 
-            <div class="field"><strong>评论时间：</strong> {{BJ_TIME}}</div>
-            <div class="field"><strong>评论地址：</strong> <a href="{{BLOG_URL}}">{{BLOG_URL}}</a></div>
-            <div class="field"><strong>评论人：</strong> {{COMMENT_USER}}</div>
-            <div class="field"><strong>评论内容：</strong><br>{{COMMENT_BODY}}</div>
-            <div class="field"><strong>评论链接：</strong> <a href="{{DISCUSSION_URL}}">{{DISCUSSION_URL}}</a></div>
+            <div class="field">
+                <strong>评论时间：</strong> {{BJ_TIME}}
+            </div>
+            <div class="field">
+                <strong>评论人：</strong> {{COMMENT_USER}}
+            </div>
+            <div class="field">
+                <strong>评论内容：</strong>
+                <div class="content">{{COMMENT_BODY}}</div>
+            </div>
+            <div class="field">
+                <strong>查看博客：</strong><br>
+                <a href="{{BLOG_URL}}" class="button">访问博客文章</a>
+            </div>
+            <div class="field">
+                <strong>查看评论讨论：</strong><br>
+                <a href="{{DISCUSSION_URL}}" class="button">查看评论详情</a>
+            </div>
 
             <div class="divider"></div>
-            <div class="footer">这是自动生成的邮件，请勿直接回复</div>
+            <div class="footer">这是自动生成的邮件，请勿直接回复。</div>
         </div>
     </div>
 </body>
