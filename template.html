@@ -1,46 +1,76 @@
-jobs:
-  notify:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>博客评论通知</title>
+    <style>
+        body {
+            font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 30px 0;
+        }
+        .container {
+            max-width: 650px;
+            margin: auto;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 30px 25px;
+            color: #333333;
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            font-size: 26px;
+            font-weight: 700;
+            color: #1a73e8;
+            margin-bottom: 25px;
+        }
+        .field {
+            margin-bottom: 18px;
+            font-size: 16px;
+        }
+        .field strong {
+            display: inline-block;
+            width: 130px;
+            color: #555555;
+        }
+        a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .divider {
+            border-top: 1px solid #e0e0e0;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            color: #999999;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">💬 来自博客的新评论</div>
 
-      - name: Convert UTC to Beijing Time
-        id: time
-        run: |
-          UTC_TIME="${{ github.event.comment.created_at }}"
-          BJ_TIME=$(date -d "$UTC_TIME 8 hour" "+%Y-%m-%d %H:%M:%S")
-          echo "bj=$BJ_TIME" >> $GITHUB_OUTPUT
+            <div class="field"><strong>评论时间：</strong> {{BJ_TIME}}</div>
+            <div class="field"><strong>评论地址：</strong> <a href="{{BLOG_URL}}">{{BLOG_URL}}</a></div>
+            <div class="field"><strong>评论人：</strong> {{COMMENT_USER}}</div>
+            <div class="field"><strong>评论内容：</strong><br>{{COMMENT_BODY}}</div>
+            <div class="field"><strong>评论链接：</strong> <a href="{{DISCUSSION_URL}}">{{DISCUSSION_URL}}</a></div>
 
-      - name: Escape HTML characters
-        id: escape
-        run: |
-          COMMENT_BODY=$(echo '${{ github.event.comment.body }}' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
-          echo "comment_body=$COMMENT_BODY" >> $GITHUB_OUTPUT
-
-      - name: Debug paths
-        run: |
-          echo "Current dir: $PWD"
-          ls -al $GITHUB_WORKSPACE
-
-
-      - name: Prepare email HTML
-        run: |
-          cp $GITHUB_WORKSPACE/template.html email.html
-          sed -i "s|{{BJ_TIME}}|${{ steps.time.outputs.bj }}|g" email.html
-          sed -i "s|{{COMMENT_BODY}}|${{ steps.escape.outputs.comment_body }}|g" email.html
-          sed -i "s|{{COMMENT_USER}}|${{ github.event.comment.user.login }}|g" email.html
-          sed -i "s|{{DISCUSSION_URL}}|${{ github.event.comment.html_url }}|g" email.html
-          sed -i "s|{{BLOG_URL}}|${{ secrets.BLOG_BASE_URL }}${{ github.event.discussion.title }}|g" email.html
-
-      - name: Send email
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: smtp.qq.com
-          server_port: 465
-          username: ${{ secrets.MAIL_USERNAME }}
-          password: ${{ secrets.MAIL_PASSWORD }}
-          subject: "博客有新评论！"
-          to: "2396768163@qq.com"
-          from: "Giscus <${{ secrets.MAIL_USERNAME }}>"
-          html_body: file://email.html
+            <div class="divider"></div>
+            <div class="footer">这是自动生成的邮件，请勿直接回复</div>
+        </div>
+    </div>
+</body>
+</html>
