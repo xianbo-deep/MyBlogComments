@@ -2,35 +2,40 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>博客新评论通知</title>
+    <title>博客评论通知</title>
     <style>
         body {
-            font-family: "Microsoft YaHei", Arial, sans-serif;
-            background-color: #f2f2f2;
+            font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f6f8;
             margin: 0;
-            padding: 20px;
+            padding: 30px 0;
+        }
+        .container {
+            max-width: 650px;
+            margin: auto;
         }
         .card {
-            background-color: #ffffff;
-            max-width: 600px;
-            margin: auto;
-            padding: 20px 30px;
+            background: #ffffff;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        .title {
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 30px 25px;
             color: #333333;
-            margin-bottom: 20px;
-        }
-        .field {
-            margin-bottom: 15px;
-            font-size: 16px;
             line-height: 1.6;
         }
+        .header {
+            text-align: center;
+            font-size: 26px;
+            font-weight: 700;
+            color: #1a73e8;
+            margin-bottom: 25px;
+        }
+        .field {
+            margin-bottom: 18px;
+            font-size: 16px;
+        }
         .field strong {
+            display: inline-block;
+            width: 130px;
             color: #555555;
         }
         a {
@@ -40,20 +45,31 @@
         a:hover {
             text-decoration: underline;
         }
+        .divider {
+            border-top: 1px solid #e0e0e0;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            color: #999999;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="title">📢 来自博客的新评论</div>
+    <div class="container">
+        <div class="card">
+            <div class="header">来自博客的新评论</div>
 
-        <div class="field"><strong>评论时间（北京时间）：</strong> {{BJ_TIME}}</div>
-        <div class="field"><strong>评论地址：</strong> 
-            <a href="{{BLOG_URL}}">{{BLOG_URL}}</a>
-        </div>
-        <div class="field"><strong>评论内容：</strong><br>{{COMMENT_BODY}}</div>
-        <div class="field"><strong>评论人：</strong> {{COMMENT_USER}}</div>
-        <div class="field"><strong>评论链接：</strong>
-            <a href="{{DISCUSSION_URL}}">{{DISCUSSION_URL}}</a>
+            <div class="field"><strong>评论时间：</strong> {{BJ_TIME}}</div>
+            <div class="field"><strong>评论地址：</strong> <a href="{{BLOG_URL}}">{{BLOG_URL}}</a></div>
+            <div class="field"><strong>评论人：</strong> {{COMMENT_USER}}</div>
+            <div class="field"><strong>评论内容：</strong><br>{{COMMENT_BODY}}</div>
+            <div class="field"><strong>评论链接：</strong> <a href="{{DISCUSSION_URL}}">{{DISCUSSION_URL}}</a></div>
+
+            <div class="divider"></div>
+            <div class="footer">这是自动生成的邮件，请勿直接回复</div>
         </div>
     </div>
 </body>
