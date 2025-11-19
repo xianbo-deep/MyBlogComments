@@ -28,24 +28,32 @@ jobs:
           from: "Giscus <${{ secrets.MAIL_USERNAME }}>"
           headers: "Time:${{ steps.time.outputs.bj }}"
           body: |
-            <div style="text-align:center; font-size:22px; font-weight:bold; margin-bottom:20px;">
-              来自博客的新评论
-            </div>
+             <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+            </head>
+            <body>
+                <div style="text-align:center; font-size:22px; font-weight:bold; margin-bottom:20px;">
+                  来自博客的新评论
+                </div>
 
-            <div style="font-size:16px; line-height:1.6;">
-              <p><strong>评论时间（北京时间）：</strong> ${{ steps.time.outputs.bj }}</p>
+                <div style="font-size:16px; line-height:1.6;">
+                  <p><strong>评论时间（北京时间）：</strong> ${{ steps.time.outputs.bj }}</p>
 
-              <p><strong>评论地址：</strong>
-              <a href="https://xbzhong.cn/${{ github.event.discussion.title }}">
-              https://xbzhong.cn/${{ github.event.discussion.title }}</a></p>
+                  <p><strong>评论地址：</strong>
+                  <a href="https://xbzhong.cn/${{ github.event.discussion.title }}">
+                  https://xbzhong.cn/${{ github.event.discussion.title }}</a></p>
 
-              <p><strong>评论内容：</strong><br>
-              ${{ github.event.comment.body }}</p>
+                  <p><strong>评论内容：</strong><br>
+                  ${{ steps.escape.outputs.comment_body }}</p>
 
-              <p><strong>评论人：</strong>
-              ${{ github.event.comment.user.login }}</p>
+                  <p><strong>评论人：</strong>
+                  ${{ github.event.comment.user.login }}</p>
 
-              <p><strong>评论链接：</strong>
-              <a href="${{ github.event.comment.html_url }}">
-              ${{ github.event.comment.html_url }}</a></p>
-            </div>
+                  <p><strong>评论链接：</strong>
+                  <a href="${{ github.event.comment.html_url }}">
+                  ${{ github.event.comment.html_url }}</a></p>
+                </div>
+            </body>
+            </html>
