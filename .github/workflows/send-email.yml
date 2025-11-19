@@ -1,0 +1,26 @@
+name: 评论自动发送邮箱
+
+on:
+  discussion_comment:
+    types: [created]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "Giscus 有新评论！"
+          to: "2396768163@qq.com"
+          from: "GitHub Actions <2396768163@qq.com.com>"
+          body: |
+            来自 Giscus 的新评论：
+            讨论标题：${{ github.event.discussion.title }}
+            评论内容：${{ github.event.comment.body }}
+            作者：${{ github.event.comment.user.login }}
+            链接：${{ github.event.comment.html_url }}
