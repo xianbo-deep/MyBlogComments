@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>博客新评论通知</title>
+    <style>
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+        .card {
+            background-color: #ffffff;
+            max-width: 600px;
+            margin: auto;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333333;
+            margin-bottom: 20px;
+        }
+        .field {
+            margin-bottom: 15px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .field strong {
+            color: #555555;
+        }
+        a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="title">📢 来自博客的新评论</div>
+
+        <div class="field"><strong>评论时间（北京时间）：</strong> {{BJ_TIME}}</div>
+        <div class="field"><strong>评论地址：</strong> 
+            <a href="{{BLOG_URL}}">{{BLOG_URL}}</a>
+        </div>
+        <div class="field"><strong>评论内容：</strong><br>{{COMMENT_BODY}}</div>
+        <div class="field"><strong>评论人：</strong> {{COMMENT_USER}}</div>
+        <div class="field"><strong>评论链接：</strong>
+            <a href="{{DISCUSSION_URL}}">{{DISCUSSION_URL}}</a>
+        </div>
+    </div>
+</body>
+</html>
