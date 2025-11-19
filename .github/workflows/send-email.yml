@@ -1,4 +1,4 @@
-name: 评论自动发送邮箱
+name: Notify Blog Comment
 
 on:
   discussion_comment:
@@ -8,7 +8,9 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
-      
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Convert UTC to Beijing Time
         id: time
         run: |
@@ -16,24 +18,26 @@ jobs:
           BJ_TIME=$(date -d "$UTC_TIME 8 hour" "+%Y-%m-%d %H:%M:%S")
           echo "bj=$BJ_TIME" >> $GITHUB_OUTPUT
 
-      
       - name: Escape HTML characters
         id: escape
         run: |
           COMMENT_BODY=$(echo '${{ github.event.comment.body }}' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
           echo "comment_body=$COMMENT_BODY" >> $GITHUB_OUTPUT
 
-      
+      - name: Debug files
+        run: |
+          echo "Current dir: $PWD"
+          ls -al $GITHUB_WORKSPACE
+
       - name: Prepare email HTML
         run: |
-          cp template.html email.html
+          cp $GITHUB_WORKSPACE/template.html email.html
           sed -i "s|{{BJ_TIME}}|${{ steps.time.outputs.bj }}|g" email.html
           sed -i "s|{{COMMENT_BODY}}|${{ steps.escape.outputs.comment_body }}|g" email.html
           sed -i "s|{{COMMENT_USER}}|${{ github.event.comment.user.login }}|g" email.html
           sed -i "s|{{DISCUSSION_URL}}|${{ github.event.comment.html_url }}|g" email.html
           sed -i "s|{{BLOG_URL}}|${{ secrets.BLOG_BASE_URL }}${{ github.event.discussion.title }}|g" email.html
 
-      
       - name: Send email
         uses: dawidd6/action-send-mail@v3
         with:
@@ -44,6 +48,4 @@ jobs:
           subject: "博客有新评论！"
           to: "2396768163@qq.com"
           from: "Giscus <${{ secrets.MAIL_USERNAME }}>"
-
-          # 直接读取生成好的 HTML 文件
           html_body: file://email.html
