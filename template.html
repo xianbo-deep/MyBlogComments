@@ -17,6 +17,8 @@ jobs:
         run: |
           COMMENT_BODY=$(echo '${{ github.event.comment.body }}' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
           echo "comment_body=$COMMENT_BODY" >> $GITHUB_OUTPUT
+      - name: List files
+        run: ls -l
 
       - name: Prepare email HTML
         run: |
