@@ -8,6 +8,13 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
+      - name: Convert UTC to Beijing Time
+        id: time
+        run: |
+          UTC_TIME="${{ github.event.comment.created_at }}"
+          BJ_TIME=$(date -d "$UTC_TIME 8 hour" "+%Y-%m-%d %H:%M:%S")
+          echo "bj=$BJ_TIME" >> $GITHUB_OUTPUT
+
       - name: Send email
         uses: dawidd6/action-send-mail@v3
         with:
@@ -15,12 +22,13 @@ jobs:
           server_port: 465
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          subject: "Giscus 有新评论！"
+          subject: "博客有新评论！"
           to: "2396768163@qq.com"
           from: "Giscus <${{ secrets.MAIL_USERNAME }}>"
+          headers: "Time:${{ steps.time.outputs.bj }}"
           body: |
-            来自 Giscus 的新评论：
-            讨论标题：${{ github.event.discussion.title }}
+            来自博客的新评论：
+            评论地址：https://xbzhong.cn/${{ github.event.discussion.title }}
             评论内容：${{ github.event.comment.body }}
-            作者：${{ github.event.comment.user.login }}
+            评论人：${{ github.event.comment.user.login }}
             链接：${{ github.event.comment.html_url }}
