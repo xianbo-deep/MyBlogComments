@@ -20,7 +20,7 @@ jobs:
 
       - name: Prepare email HTML
         run: |
-          cp template.html email.html
+          cp $GITHUB_WORKSPACE/template.html email.html
           sed -i "s|{{BJ_TIME}}|${{ steps.time.outputs.bj }}|g" email.html
           sed -i "s|{{COMMENT_BODY}}|${{ steps.escape.outputs.comment_body }}|g" email.html
           sed -i "s|{{COMMENT_USER}}|${{ github.event.comment.user.login }}|g" email.html
