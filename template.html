@@ -5,12 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>新评论通知</title>
     <style>
-        /* 客户端特定重置 */
         body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
         table, td { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
         img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; }
         
-        /* 移动端优化 */
         @media only screen and (max-width: 480px) {
             .container { width: 100% !important; padding: 20px !important; }
             .btn { display: block !important; width: 100% !important; text-align: center !important; margin-bottom: 10px !important; }
@@ -20,27 +18,44 @@
 </head>
 <body style="margin: 0; padding: 0; background-color: #f2f3f5; font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333333;">
 
-    <!-- 外部背景 -->
     <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f2f3f5;">
         <tr>
             <td align="center" style="padding: 40px 0;">
                 
-                <!-- 主内容卡片 -->
                 <table border="0" cellpadding="0" cellspacing="0" width="600" class="container" style="background-color: #ffffff; width: 600px; max-width: 100%; border: 1px solid #e1e4e8;">
                     
-                    <!-- 顶部极简装饰条 (可选，保留一点品牌色) -->
                     <tr>
                         <td height="4" style="background-color: #4285f4; font-size: 0; line-height: 0;">&nbsp;</td>
                     </tr>
 
+                    <!-- 🔹 新增头像展示 -->
+                    <tr>
+                        <td style="padding: 30px 40px 0 40px; text-align: left;">
+                            <img src="{{USER_AVATAR}}" width="40" height="40" style="border-radius: 50%;">
+                        </td>
+                    </tr>
+
                     <!-- 标题与元信息区 -->
                     <tr>
-                        <td style="padding: 40px 40px 20px 40px;">
+                        <td style="padding: 20px 40px 20px 40px;">
                             <h1 style="margin: 0 0 12px 0; font-size: 22px; font-weight: 600; color: #111111; letter-spacing: -0.5px;">
                                 收到一条新评论
                             </h1>
+
+                            <!-- 🔹 新增字段展示 -->
                             <p style="margin: 0; font-size: 14px; color: #666666; line-height: 1.6;">
-                                来自 <strong style="color: #111111;">{{COMMENT_USER}}</strong>
+                                来自 <strong style="color: #111111;">
+                                    <a href="{{USER_URL}}" style="color: #111111; text-decoration: none;">
+                                        {{COMMENT_USER}}
+                                    </a>
+                                </strong>
+
+                                <span style="color: #cccccc; margin: 0 8px;">|</span>
+                                类型：{{COMMENT_USER_TYPE}}
+
+                                <span style="color: #cccccc; margin: 0 8px;">|</span>
+                                回复：{{IS_REPLY}}
+
                                 <span style="color: #cccccc; margin: 0 8px;">|</span>
                                 {{BJ_TIME}}
                             </p>
@@ -50,24 +65,20 @@
                     <!-- 评论内容区 -->
                     <tr>
                         <td style="padding: 0 40px;">
-                            <!-- 使用浅灰色背景块衬托内容，无边框 -->
                             <div style="background-color: #f8f9fa; padding: 24px; font-size: 15px; line-height: 1.8; color: #333333; word-break: break-word; text-align: left;">
                                 {{COMMENT_BODY}}
                             </div>
                         </td>
                     </tr>
 
-                    <!-- 按钮操作区 -->
                     <tr>
                         <td style="padding: 30px 40px 40px 40px;">
                             <table border="0" cellpadding="0" cellspacing="0" width="100%">
                                 <tr>
                                     <td align="left">
-                                        <!-- 实心主按钮 -->
                                         <a href="{{BLOG_URL}}" target="_blank" class="btn" style="display: inline-block; padding: 12px 24px; background-color: #111111; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 500; border-radius: 2px; margin-right: 16px; border: 1px solid #111111;">
                                             查看文章
                                         </a>
-                                        <!-- 线框次要按钮 -->
                                         <a href="{{DISCUSSION_URL}}" target="_blank" class="btn" style="display: inline-block; padding: 12px 24px; background-color: transparent; color: #555555; text-decoration: none; font-size: 14px; font-weight: 500; border-radius: 2px; border: 1px solid #d1d5da;">
                                             回复评论
                                         </a>
@@ -77,7 +88,6 @@
                         </td>
                     </tr>
 
-                    <!-- 底部链接详情 (备用) -->
                     <tr>
                         <td style="padding: 0 40px 40px 40px; border-top: 1px solid #f0f0f0;">
                             <div style="padding-top: 20px; font-size: 12px; color: #999999; line-height: 1.5;">
@@ -88,7 +98,6 @@
 
                 </table>
 
-                <!-- 页脚 -->
                 <table border="0" cellpadding="0" cellspacing="0" width="600" class="container">
                     <tr>
                         <td align="center" style="padding-top: 24px; font-size: 12px; color: #b0b0b0;">
