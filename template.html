@@ -3,142 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>博客评论通知</title>
+    <title>新评论通知</title>
     <style>
-        :root {
-            --primary-color: #4285f4;
-            --secondary-color: #34a853;
-            --text-color: #3c4043;
-            --light-gray: #f5f5f5;
-            --border-color: #dadce0;
-        }
+        /* 客户端特定重置 */
+        body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table, td { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; }
         
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #ffffff;
-            color: var(--text-color);
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
-        }
-        
-        .container {
-            max-width: 100%;
-            width: 100%;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        
-        .header {
-            text-align: center;
-            font-size: 24px;
-            font-weight: 500;
-            margin-bottom: 24px;
-            color: var(--primary-color);
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        .card {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.1), 0 2px 6px 2px rgba(60, 64, 67, 0.1);
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .field {
-            margin-bottom: 16px;
-        }
-        
-        .field-title {
-            font-weight: 500;
-            margin-bottom: 8px;
-            color: var(--primary-color);
-            font-size: 14px;
-        }
-        
-        .field-content {
-            font-size: 16px;
-            word-break: break-word;
-            padding: 8px 12px;
-            background-color: var(--light-gray);
-            border-radius: 4px;
-        }
-        
-        a {
-            color: var(--primary-color);
-            text-decoration: none;
-            word-break: break-all;
-        }
-        
-        a:hover {
-            text-decoration: underline;
-        }
-        
-        .footer {
-            font-size: 12px;
-            color: #70757a;
-            text-align: center;
-            margin-top: 32px;
-            padding-top: 16px;
-            border-top: 1px solid var(--border-color);
-        }
-        
-        @media (max-width: 480px) {
-            .container {
-                padding: 16px;
-            }
-            
-            .header {
-                font-size: 20px;
-                margin-bottom: 20px;
-            }
-            
-            .field-content {
-                font-size: 14px;
-            }
+        /* 移动端优化 */
+        @media only screen and (max-width: 480px) {
+            .container { width: 100% !important; padding: 20px !important; }
+            .btn { display: block !important; width: 100% !important; text-align: center !important; margin-bottom: 10px !important; }
+            .spacer { height: 20px !important; }
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="header">新评论通知</div>
-        
-        <div class="card">
-            <div class="field">
-                <div class="field-title">评论时间</div>
-                <div class="field-content">{{BJ_TIME}}</div>
-            </div>
+<body style="margin: 0; padding: 0; background-color: #f2f3f5; font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333333;">
 
-            <div class="field">
-                <div class="field-title">评论人</div>
-                <div class="field-content">{{COMMENT_USER}}</div>
-            </div>
+    <!-- 外部背景 -->
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f2f3f5;">
+        <tr>
+            <td align="center" style="padding: 40px 0;">
+                
+                <!-- 主内容卡片 -->
+                <table border="0" cellpadding="0" cellspacing="0" width="600" class="container" style="background-color: #ffffff; width: 600px; max-width: 100%; border: 1px solid #e1e4e8;">
+                    
+                    <!-- 顶部极简装饰条 (可选，保留一点品牌色) -->
+                    <tr>
+                        <td height="4" style="background-color: #4285f4; font-size: 0; line-height: 0;">&nbsp;</td>
+                    </tr>
 
-            <div class="field">
-                <div class="field-title">评论内容</div>
-                <div class="field-content">{{COMMENT_BODY}}</div>
-            </div>
-        </div>
-        
-        <div class="card">
-            <div class="field">
-                <div class="field-title">博客文章链接</div>
-                <div class="field-content"><a href="{{BLOG_URL}}" target="_blank">{{BLOG_URL}}</a></div>
-            </div>
+                    <!-- 标题与元信息区 -->
+                    <tr>
+                        <td style="padding: 40px 40px 20px 40px;">
+                            <h1 style="margin: 0 0 12px 0; font-size: 22px; font-weight: 600; color: #111111; letter-spacing: -0.5px;">
+                                收到一条新评论
+                            </h1>
+                            <p style="margin: 0; font-size: 14px; color: #666666; line-height: 1.6;">
+                                来自 <strong style="color: #111111;">{{COMMENT_USER}}</strong>
+                                <span style="color: #cccccc; margin: 0 8px;">|</span>
+                                {{BJ_TIME}}
+                            </p>
+                        </td>
+                    </tr>
 
-            <div class="field">
-                <div class="field-title">评论区链接</div>
-                <div class="field-content"><a href="{{DISCUSSION_URL}}" target="_blank">{{DISCUSSION_URL}}</a></div>
-            </div>
-        </div>
+                    <!-- 评论内容区 -->
+                    <tr>
+                        <td style="padding: 0 40px;">
+                            <!-- 使用浅灰色背景块衬托内容，无边框 -->
+                            <div style="background-color: #f8f9fa; padding: 24px; font-size: 15px; line-height: 1.8; color: #333333; word-break: break-word; text-align: left;">
+                                {{COMMENT_BODY}}
+                            </div>
+                        </td>
+                    </tr>
 
-        <div class="footer">
-            这是自动生成的邮件，请勿直接回复。<br>
-            ©2025 xbzhong.cn 版权所有
-        </div>
-    </div>
+                    <!-- 按钮操作区 -->
+                    <tr>
+                        <td style="padding: 30px 40px 40px 40px;">
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td align="left">
+                                        <!-- 实心主按钮 -->
+                                        <a href="{{BLOG_URL}}" target="_blank" class="btn" style="display: inline-block; padding: 12px 24px; background-color: #111111; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 500; border-radius: 2px; margin-right: 16px; border: 1px solid #111111;">
+                                            查看文章
+                                        </a>
+                                        <!-- 线框次要按钮 -->
+                                        <a href="{{DISCUSSION_URL}}" target="_blank" class="btn" style="display: inline-block; padding: 12px 24px; background-color: transparent; color: #555555; text-decoration: none; font-size: 14px; font-weight: 500; border-radius: 2px; border: 1px solid #d1d5da;">
+                                            回复评论
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- 底部链接详情 (备用) -->
+                    <tr>
+                        <td style="padding: 0 40px 40px 40px; border-top: 1px solid #f0f0f0;">
+                            <div style="padding-top: 20px; font-size: 12px; color: #999999; line-height: 1.5;">
+                                <p style="margin: 0;">文章链接：<a href="{{BLOG_URL}}" style="color: #999999; text-decoration: underline;">{{BLOG_URL}}</a></p>
+                            </div>
+                        </td>
+                    </tr>
+
+                </table>
+
+                <!-- 页脚 -->
+                <table border="0" cellpadding="0" cellspacing="0" width="600" class="container">
+                    <tr>
+                        <td align="center" style="padding-top: 24px; font-size: 12px; color: #b0b0b0;">
+                            © 2025 xbzhong.cn
+                        </td>
+                    </tr>
+                </table>
+
+            </td>
+        </tr>
+    </table>
 </body>
 </html>
