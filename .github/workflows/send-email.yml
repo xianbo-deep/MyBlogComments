@@ -37,6 +37,10 @@ jobs:
           sed -i "s|{{COMMENT_USER}}|${{ github.event.comment.user.login }}|g" email.html
           sed -i "s|{{DISCUSSION_URL}}|${{ github.event.comment.html_url }}|g" email.html
           sed -i "s|{{BLOG_URL}}|${{ secrets.BLOG_BASE_URL }}${{ github.event.discussion.title }}|g" email.html
+          sed -i "s|{{COMMENT_USER_TYPE}}|${{ github.event.comment.user.type }}|g" email.html
+          sed -i "s|{{USER_URL}}|${{ github.event.comment.user.html_url }}|g" email.html
+          sed -i "s|{{USER_AVATAR}}|${{ github.event.comment.user.avatar_url }}|g" email.html
+          sed -i "s|{{IS_REPLY}}|${{ github.event.comment.parent_id }}|g" email.html
 
       - name: Send email
         uses: dawidd6/action-send-mail@v3
