@@ -26,6 +26,9 @@ jobs:
         id: data
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 必须用当前评论的 Node ID (Base64格式)，因为它是 GraphQL 唯一认的 ID
+          CURRENT_NODE_ID: ${{ github.event.comment.node_id }}
+          # 这个 ID 仅用于判断是否存在父评论，不用于查询
           PARENT_ID: ${{ github.event.comment.parent_id }}
         run: |
           # 转义当前评论内容
@@ -35,13 +38,14 @@ jobs:
           REPLY_TO_USER_OUT=""
           REPLY_TO_BODY_OUT=""
 
-          # 如果是回复，调用 GraphQL 获取父评论
+          # 如果 PARENT_ID 存在，说明这确实是一个回复
           if [ -n "$PARENT_ID" ]; then
             STATUS_TEXT="新的回复"
 
-            # --- 修改开始：去掉了 replyTo 嵌套 ---
-            QUERY=$(jq -nc --arg cid "$PARENT_ID" '{"query":"query($id: ID!){ node(id:$id) { ... on DiscussionComment { body author { login } } } }","variables":{"id":$cid}}')
-            # --- 修改结束 ---
+            echo "正在查询当前评论 ($CURRENT_NODE_ID) 的父级信息..."
+
+            # --- 核心修改：查询当前评论，获取它的 replyTo 对象 ---
+            QUERY=$(jq -nc --arg cid "$CURRENT_NODE_ID" '{"query":"query($id: ID!){ node(id:$id) { ... on DiscussionComment { replyTo { body author { login } } } } }","variables":{"id":$cid}}')
 
             RESPONSE=$(curl -s -X POST \
               -H "Authorization: Bearer $GH_TOKEN" \
@@ -49,13 +53,11 @@ jobs:
               -d "$QUERY" \
               https://api.github.com/graphql)
 
-            # 调试：打印一下 API 返回结果（排错时很有用，生产环境可注释）
             echo "Debug GraphQL Response: $RESPONSE"
 
-            # --- 修改开始：解析路径去掉了 .replyTo ---
-            REPLY_TO_USER_OUT=$(echo "$RESPONSE" | jq -r '.data.node.author.login // empty')
-            RAW_BODY=$(echo "$RESPONSE" | jq -r '.data.node.body // empty')
-            # --- 修改结束 ---
+            # 解析 replyTo 里面的数据
+            REPLY_TO_USER_OUT=$(echo "$RESPONSE" | jq -r '.data.node.replyTo.author.login // empty')
+            RAW_BODY=$(echo "$RESPONSE" | jq -r '.data.node.replyTo.body // empty')
 
             # 转为 HTML 安全格式
             REPLY_TO_BODY_OUT=$(echo "$RAW_BODY" | awk '{gsub("\n","<br>"); print}' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
