@@ -5,7 +5,7 @@ on:
     types: [created]
 
 jobs:
-  notify:
+  notify-comment:
     runs-on: ubuntu-latest
     permissions:
       discussions: read
