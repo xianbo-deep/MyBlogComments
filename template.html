@@ -14,7 +14,7 @@
         .reply-block {
             border-left: 3px solid #e1e4e8;
             padding: 12px 15px;
-            margin-bottom: 20px;
+            /* No margin-bottom here, added padding later */
             background-color: #fcfcfc;
         }
 
@@ -79,34 +79,8 @@
                     </tr>
 
                     <!-- ⬇️ 被回复内容区块 ⬇️ -->
-                    <!-- 仅当 PARENT_BODY 不为空时，此区块才会被有效内容填充 -->
-                    <tr>
-                        <td style="padding: 0 40px;">
-                            <!-- 我们不再在非回复时填充 "--"，而是填充空字符串 ""，这样整个 table 元素就不会显示多余内容。 -->
-                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="font-size: 14px; line-height: 1.6; mso-padding-alt: 0 0 0 0;" 
-                                   {{#if PARENT_BODY}}style="display: block; margin-bottom: 20px;"{{else}}style="display: none;"{{/if}}>
-                                <tr>
-                                    <td class="reply-block" style="border-left: 3px solid #e1e4e8; padding: 12px 15px; background-color: #fcfcfc;">
-                                        <p style="margin: 0 0 8px 0; font-weight: 600; color: #555555;">
-                                            回复 <span style="color: #4285f4; text-decoration: none;">{{PARENT_USER}}</span> 的评论：
-                                        </p>
-                                        <div style="font-size: 14px; color: #888888; overflow: hidden; max-height: 60px;">
-                                            {{PARENT_BODY}}
-                                        </div>
-                                        <p style="margin: 8px 0 0 0; text-align: right;">
-                                            <!-- 使用 IS_REPLY 作为 Comment ID 的一部分进行锚点链接 -->
-                                            <a href="{{DISCUSSION_URL}}#discussion-comment-{{IS_REPLY}}" style="color: #4285f4; text-decoration: none; font-size: 12px;">
-                                                查看原评论 »
-                                            </a>
-                                        </p>
-                                    </td>
-                                </tr>
-                            </table>
-                            
-                            <!-- 确保非回复时，评论内容前没有多余的垂直空间 -->
-                            <div style="height: {{#if PARENT_BODY}}0px{{else}}20px{{/if}}; line-height: {{#if PARENT_BODY}}0px{{else}}20px{{/if}};">&nbsp;</div>
-                        </td>
-                    </tr>
+                    <!-- 整个区块由 Workflow 构造并插入，如果不是回复，则插入空字符串 -->
+                    {{REPLY_BLOCK_SECTION}}
                     <!-- ⬆️ 被回复内容区块结束 ⬆️ -->
 
                     <!-- 评论内容区 (主体) -->
