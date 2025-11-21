@@ -44,7 +44,7 @@ jobs:
             # --- 修改结束 ---
 
             RESPONSE=$(curl -s -X POST \
-              -H "Authorization: Bearer '"$GH_TOKEN"'" \
+              -H "Authorization: Bearer $GH_TOKEN" \
               -H "Content-Type: application/json" \
               -d "$QUERY" \
               https://api.github.com/graphql)
