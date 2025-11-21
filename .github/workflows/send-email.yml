@@ -27,11 +27,8 @@ jobs:
       - name: Prepare All Comment Data
         id: data
         env:
-          # 注意：GitHub Token 需要加上 "token " 前缀
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PARENT_ID: ${{ github.event.comment.parent_id }}
-          REPOSITORY_ID: ${{ github.event.repository.id }}
-          DISCUSSION_NUMBER: ${{ github.event.discussion.number }}
         run: |
           # 1. 处理当前评论内容 (转义和换行符)
           COMMENT_BODY=$(echo '${{ github.event.comment.body }}' | awk '{gsub("\n", "<br>"); print}' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
@@ -45,19 +42,30 @@ jobs:
           if [ -n "$PARENT_ID" ]; then
               STATUS_TEXT="是 (回复)"
               
-              # 使用 curl 调用 GitHub REST API (使用用户提供的结构)
-             RESPONSE=$(curl -s \
-              -H "Authorization: Bearer $GH_TOKEN" \
-              -H "Accept: application/vnd.github+json" \
-              "https://api.github.com/repos/${{ github.repository }}/discussions/comments/$PARENT_ID")
+              # 🔥 修复：使用 curl 调用 GitHub GraphQL API 来查询 Node ID (PARENT_ID)
+              QUERY='{"query": "query($id: ID!) { node(id: $id) { ... on DiscussionComment { author { login } body } } }", "variables": {"id": "'$PARENT_ID'"}}'
 
+              RESPONSE=$(curl -s \
+                -X POST \
+                -H "Authorization: Bearer $GH_TOKEN" \
+                -H "Content-Type: application/json" \
+                -d "$QUERY" \
+                "https://api.github.com/graphql")
 
-              # 提取字段
-              REPLY_TO_USER_OUT=$(echo "$RESPONSE" | jq -r '.user.login')
-              RAW_BODY=$(echo "$RESPONSE" | jq -r '.body')
+              # 提取字段 (注意：GraphQL 结构与 REST 不同)
+              REPLY_TO_USER_OUT=$(echo "$RESPONSE" | jq -r '.data.node.author.login')
+              RAW_BODY=$(echo "$RESPONSE" | jq -r '.data.node.body')
               
-              # 转义父评论内容 (替换换行符为 <br>)
-              REPLY_TO_BODY_OUT=$(echo "$RAW_BODY" | awk '{gsub("\n", "<br>"); print}' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
+              # 检查是否成功获取数据
+              if [ "$REPLY_TO_USER_OUT" = "null" ] || [ -z "$REPLY_TO_USER_OUT" ]; then
+                  # 如果获取失败（通常是权限或 API 问题），保留空值
+                  REPLY_TO_USER_OUT=""
+                  REPLY_TO_BODY_OUT=""
+                  STATUS_TEXT="是 (回复 - 获取失败)"
+              else
+                  # 成功获取，转义父评论内容 (替换换行符为 <br>)
+                  REPLY_TO_BODY_OUT=$(echo "$RAW_BODY" | awk '{gsub("\n", "<br>"); print}' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
+              fi
           fi
           
           # 4. 导出所有变量 (确保所有变量在任何情况下都被定义)
@@ -66,7 +74,7 @@ jobs:
           echo "reply_to_user=$REPLY_TO_USER_OUT" >> $GITHUB_OUTPUT
           echo "reply_to_body=$REPLY_TO_BODY_OUT" >> $GITHUB_OUTPUT
           
-          # 构造一个用于 HTML 隐藏的变量
+          # 构造 HTML 隐藏逻辑所需的变量
           if [ -z "$REPLY_TO_BODY_OUT" ]; then
              # 非回复时，使用 style="display: none;" 隐藏整个区块
              DISPLAY_STYLE_OUT='display: none;'
