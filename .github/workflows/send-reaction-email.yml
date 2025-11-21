@@ -1,1 +1,83 @@
+name: Notify Blog Reaction
 
+on:
+  reaction:
+    types: [created]
+
+
+jobs:
+  notify-reaction:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Convert to Beijing Time
+        id: time
+        run: |
+          UTC_TIME="${{ github.event.reaction.created_at }}"
+          BJ_TIME=$(date -d "$UTC_TIME 8 hour" "+%Y-%m-%d %H:%M:%S")
+          echo "bj=$BJ_TIME" >> $GITHUB_OUTPUT
+      
+      - name: Get vairables
+        run: |
+          REACTION_CONTENT="${{ github.event.reaction.content }}"
+          case "$REACTION_CONTENT" in
+            "+1") ICON="👍" ;;
+            "-1") ICON="👎" ;;
+            "laugh") ICON="😄" ;;
+            "confused") ICON="😕" ;;
+            "heart") ICON="❤️" ;;
+            "hooray") ICON="🎉" ;;
+            "rocket") ICON="🚀" ;;
+            "eyes") ICON="👀" ;;
+            *) ICON="$REACTION_CONTENT" ;;
+          esac
+          echo "REACTION_USER=${{ github.event.reaction.user.login }}" >> $GITHUB_ENV
+          echo "REACTION_AVATAR=${{ github.event.reaction.user.avatar_url }}" >> $GITHUB_ENV
+          echo "REACTION_TYPE=$ICON" >> $GITHUB_ENV
+          if [ -n "${{ github.event.comment.body }}" ]; then
+            # reaction 对评论
+            echo "TARGET_TYPE=comment" >> $GITHUB_ENV
+            echo "TARGET_CONTENT=${{ github.event.comment.body }}" >> $GITHUB_ENV
+            echo "TARGET_USER=${{ github.event.comment.user.login }}" >> $GITHUB_ENV
+            echo "TARGET_AVATAR=${{ github.event.comment.user.avatar_url }}" >> $GITHUB_ENV
+            echo "TARGET_URL=${{ github.event.discussion.html_url }}" >> $GITHUB_ENV
+          else
+            # reaction 对讨论
+            echo "TARGET_TYPE=discussion" >> $GITHUB_ENV
+            echo "TARGET_CONTENT=${{ secrets.BLOG_BASE_URL }}${{ github.event.discussion.title }}" >> $GITHUB_ENV
+            echo "TARGET_USER=" >> $GITHUB_ENV
+            echo "TARGET_AVATAR=" >> $GITHUB_ENV
+            echo "TARGET_URL=${{ github.event.discussion.html_url }}" >> $GITHUB_ENV
+          fi
+
+
+
+
+      - name: Prepare Email
+        id: email
+        run: |
+          cp reaction_template.html email.html
+          sed -i "s|{{REACTION_TYPE}}|${{ env.REACTION_TYPE }}|g" email.html
+          sed -i "s|{{REACTION_USER}}|${{ env.REACTION_USER }}|g" email.html
+          sed -i "s|{{REACTION_AVATAR}}|${{ env.REACTION_AVATAR }}|g" email.html
+          sed -i "s|{{TARGET_CONTENT}}|${{ env.TARGET_CONTENT }}|g" email.html
+          sed -i "s|{{TARGET_USER}}|${{ env.TARGET_USER }}|g" email.html
+          sed -i "s|{{TARGET_AVATAR}}|${{ env.TARGET_AVATAR }}|g" email.html
+          sed -i "s|{{TARGET_URL}}|${{ env.TARGET_URL }}|g" email.html
+
+          sed -i "s|{{YEAR}}|$(date +'%Y')|g" email.html
+
+
+      - name: Send Email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.qq.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "博客有新回应！"
+          to: "2396768163@qq.com"
+          from: "Giscus <${{ secrets.MAIL_USERNAME }}>"
+          html_body: file://email.html
