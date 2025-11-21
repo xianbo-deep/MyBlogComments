@@ -39,7 +39,9 @@ jobs:
           if [ -n "$PARENT_ID" ]; then
             STATUS_TEXT="新的回复"
 
-            QUERY=$(jq -nc --arg cid "$PARENT_ID" '{"query":"query($id: ID!){ node(id:$id) { ... on DiscussionComment { replyTo { body author { login } } } } }","variables":{"id":$cid}}')
+            # --- 修改开始：去掉了 replyTo 嵌套 ---
+            QUERY=$(jq -nc --arg cid "$PARENT_ID" '{"query":"query($id: ID!){ node(id:$id) { ... on DiscussionComment { body author { login } } } }","variables":{"id":$cid}}')
+            # --- 修改结束 ---
 
             RESPONSE=$(curl -s -X POST \
               -H "Authorization: Bearer '"$GH_TOKEN"'" \
@@ -47,8 +49,13 @@ jobs:
               -d "$QUERY" \
               https://api.github.com/graphql)
 
-            REPLY_TO_USER_OUT=$(echo "$RESPONSE" | jq -r '.data.node.replyTo.author.login // empty')
-            RAW_BODY=$(echo "$RESPONSE" | jq -r '.data.node.replyTo.body // empty')
+            # 调试：打印一下 API 返回结果（排错时很有用，生产环境可注释）
+            echo "Debug GraphQL Response: $RESPONSE"
+
+            # --- 修改开始：解析路径去掉了 .replyTo ---
+            REPLY_TO_USER_OUT=$(echo "$RESPONSE" | jq -r '.data.node.author.login // empty')
+            RAW_BODY=$(echo "$RESPONSE" | jq -r '.data.node.body // empty')
+            # --- 修改结束 ---
 
             # 转为 HTML 安全格式
             REPLY_TO_BODY_OUT=$(echo "$RAW_BODY" | awk '{gsub("\n","<br>"); print}' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
