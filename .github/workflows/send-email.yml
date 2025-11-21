@@ -18,20 +18,36 @@ jobs:
           BJ_TIME=$(date -d "$UTC_TIME 8 hour" "+%Y-%m-%d %H:%M:%S")
           echo "bj=$BJ_TIME" >> $GITHUB_OUTPUT
 
-      - name: Escape HTML characters
+      - name: Escape HTML characters for comment
         id: escape
         run: |
           COMMENT_BODY=$(echo '${{ github.event.comment.body }}' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
           echo "comment_body=$COMMENT_BODY" >> $GITHUB_OUTPUT
 
-      - name: Debug files
+      # 🔥 获取父评论内容（如果存在）
+      - name: Fetch parent comment if reply
+        id: parent
+        if: ${{ github.event.comment.parent_id != null }}
         run: |
-          echo "Current dir: $PWD"
-          ls -al $GITHUB_WORKSPACE
+          RESPONSE=$(curl -s \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repositories/${{ github.event.repository.id }}/discussions/${{ github.event.discussion.number }}/comments/${{ github.event.comment.parent_id }}")
+
+          # 提取字段
+          PARENT_BODY=$(echo "$RESPONSE" | jq -r '.body')
+          PARENT_USER=$(echo "$RESPONSE" | jq -r '.user.login')
+
+          # 转义 HTML
+          PARENT_BODY_ESCAPED=$(echo "$PARENT_BODY" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
+
+          echo "body=$PARENT_BODY_ESCAPED" >> $GITHUB_OUTPUT
+          echo "user=$PARENT_USER" >> $GITHUB_OUTPUT
 
       - name: Prepare email HTML
         run: |
           cp $GITHUB_WORKSPACE/template.html email.html
+
           sed -i "s|{{BJ_TIME}}|${{ steps.time.outputs.bj }}|g" email.html
           sed -i "s|{{COMMENT_BODY}}|${{ steps.escape.outputs.comment_body }}|g" email.html
           sed -i "s|{{COMMENT_USER}}|${{ github.event.comment.user.login }}|g" email.html
@@ -40,7 +56,13 @@ jobs:
           sed -i "s|{{COMMENT_USER_TYPE}}|${{ github.event.comment.user.type }}|g" email.html
           sed -i "s|{{USER_URL}}|${{ github.event.comment.user.html_url }}|g" email.html
           sed -i "s|{{USER_AVATAR}}|${{ github.event.comment.user.avatar_url }}|g" email.html
-          sed -i "s|{{IS_REPLY}}|${{ github.event.comment.parent_id }}|g" email.html
+
+          # 是否为回复（true / false）
+          sed -i "s|{{IS_REPLY}}|${{ github.event.comment.parent_id != null }}|g" email.html
+
+          # 插入父评论内容（为空则不替换）
+          sed -i "s|{{REPLY_TO_USER}}|${{ steps.parent.outputs.user }}|g" email.html
+          sed -i "s|{{REPLY_TO_BODY}}|${{ steps.parent.outputs.body }}|g" email.html
 
       - name: Send email
         uses: dawidd6/action-send-mail@v3
