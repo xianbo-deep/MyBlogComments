@@ -39,24 +39,22 @@
                 padding: 0 !important; 
                 box-shadow: none !important; /* Optional: Remove shadow on smallest screens */
             }
-            td.content-padding { /* New class for content padding */
-                padding: 20px 20px 0 20px !important; 
+            /* 统一内容区域的左右 padding 为 20px */
+            td.content-area { 
+                padding-left: 20px !important;
+                padding-right: 20px !important;
             }
-            td.content-padding-bottom {
-                padding: 0 20px 20px 20px !important;
+            /* 按钮区域的左右 padding 也要减小 */
+            td.button-area {
+                padding-left: 20px !important;
+                padding-right: 20px !important;
             }
-            td.button-padding {
-                padding: 0 20px 30px 20px !important;
-            }
-            td.footer-padding {
-                padding: 0 20px 30px 20px !important;
-            }
+            
             .btn-group { 
                 display: block !important; 
                 width: 100% !important; 
-                text-align: center !important; 
             }
-            /* Ensure buttons take full width and stack correctly on mobile */
+            /* 确保按钮在移动端 100% 宽度并堆叠 */
             .btn-group tr td {
                 padding-left: 0 !important;
                 padding-right: 0 !important;
@@ -67,7 +65,7 @@
                 text-align: center !important; 
                 margin: 0 !important; /* Remove any inline margins */
                 margin-bottom: 15px !important; /* Increased spacing between buttons */
-                min-width: unset !important; /* Remove min-width override to allow 100% width */
+                min-width: unset !important; /* Allow 100% width override */
                 box-sizing: border-box;
             }
             .comment-body-box {
@@ -94,7 +92,8 @@
 
                     <!-- 头像与用户信息 -->
                     <tr>
-                        <td class="content-padding" style="padding: 30px 40px 0 40px; text-align: left;">
+                        <!-- 统一使用 content-area 类，桌面端 padding: 30px 40px 0 40px; -->
+                        <td class="content-area" style="padding: 30px 40px 0 40px; text-align: left;">
                             <!-- 使用 flex-like structure for user info -->
                             <table border="0" cellpadding="0" cellspacing="0">
                                 <tr>
@@ -118,7 +117,8 @@
 
                     <!-- 标题与时间信息区 -->
                     <tr>
-                        <td class="content-padding-bottom" style="padding: 20px 40px 20px 40px;">
+                        <!-- 统一使用 content-area 类，桌面端 padding: 20px 40px 20px 40px; -->
+                        <td class="content-area" style="padding: 20px 40px 20px 40px;">
                             <h1 style="margin: 0 0 10px 0; font-size: 22px; font-weight: 700; color: #111111; letter-spacing: -0.5px;">
                                 博客收到新评论
                             </h1>
@@ -136,7 +136,8 @@
                     <!-- ⬇️ 被回复内容区块 ⬇️ -->
                     <!-- 整个表格区块根据 {{REPLY_DISPLAY_STYLE}} 隐藏或显示 -->
                     <tr>
-                        <td class="content-padding-bottom" style="padding: 0 40px; {{REPLY_DISPLAY_STYLE}}">
+                        <!-- 统一使用 content-area 类，桌面端 padding: 0 40px 20px 40px; -->
+                        <td class="content-area" style="padding: 0 40px 20px 40px; {{REPLY_DISPLAY_STYLE}}">
                             <table border="0" cellpadding="0" cellspacing="0" width="100%" style="font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
                                 <tr>
                                     <td class="reply-block">
@@ -160,7 +161,8 @@
 
                     <!-- 评论内容区 (主体) -->
                     <tr>
-                        <td class="content-padding-bottom" style="padding: 0 40px;">
+                        <!-- 统一使用 content-area 类，桌面端 padding: 0 40px 20px 40px; -->
+                        <td class="content-area" style="padding: 0 40px 20px 40px;">
                             <!-- 用于在非回复时提供必要的 20px 间距 -->
                             <div style="height: {{MARGIN_HEIGHT}}; line-height: {{MARGIN_HEIGHT}};">&nbsp;</div>
                             <div class="comment-body-box" style="background-color: #f7f9fc; padding: 24px; font-size: 15px; line-height: 1.8; color: #333333; word-break: break-word; text-align: left; border-radius: 6px;">
@@ -175,7 +177,8 @@
 
                     <!-- 按钮区 (已修改为居中，上下排列，主按钮为黑色) -->
                     <tr>
-                        <td class="button-padding" style="padding: 0 40px 40px 40px;">
+                        <!-- 统一使用 content-area 类，桌面端 padding: 0 40px 40px 40px; -->
+                        <td class="content-area button-area" style="padding: 0 40px 40px 40px;">
                             <table border="0" cellpadding="0" cellspacing="0" width="100%" class="btn-group">
                                 <!-- Primary Button: 查看文章 (黑色，居中) -->
                                 <tr>
@@ -199,7 +202,8 @@
 
                     <!-- Footer Section -->
                     <tr>
-                        <td class="footer-padding" style="padding: 0 40px 40px 40px; border-top: 1px solid #f0f0f0;">
+                        <!-- 统一使用 content-area 类，桌面端 padding: 0 40px 40px 40px; -->
+                        <td class="content-area" style="padding: 0 40px 40px 40px; border-top: 1px solid #f0f0f0;">
                             <div style="padding-top: 20px; font-size: 12px; color: #999999; line-height: 1.5;">
                                 <p style="margin: 0;">文章链接：<a href="{{BLOG_URL}}" style="color: #999999; text-decoration: underline;">{{BLOG_URL}}</a></p>
                             </div>
