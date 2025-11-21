@@ -91,6 +91,9 @@ jobs:
           sed -i "s|{{REPLY_DISPLAY_STYLE}}|${{ steps.data.outputs.reply_display_style }}|g" email.html
           sed -i "s|{{MARGIN_HEIGHT}}|${{ steps.data.outputs.margin_height }}|g" email.html
 
+          # 设置年份
+          sed -i "s|{{YEAR}}|$(date +'%Y')|g" email.html
+
       - name: Send email
         uses: dawidd6/action-send-mail@v3
         with:
