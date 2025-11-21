@@ -71,7 +71,7 @@ jobs:
 
       - name: Prepare email HTML
         run: |
-          cp $GITHUB_WORKSPACE/template.html email.html
+          cp $GITHUB_WORKSPACE/comment_template.html email.html
 
           # 替换时间和当前评论信息
           sed -i "s|{{BJ_TIME}}|${{ steps.time.outputs.bj }}|g" email.html
