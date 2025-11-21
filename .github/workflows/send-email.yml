@@ -22,31 +22,31 @@ jobs:
       - name: Escape HTML characters for comment
         id: escape
         run: |
-          COMMENT_BODY=$(echo '${{ github.event.comment.body }}' | awk '{gsub("\n", "<br>"); print}' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
+          COMMENT_BODY=$(echo '${{ github.event.comment.body }}' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
           echo "comment_body=$COMMENT_BODY" >> $GITHUB_OUTPUT
 
-      - name: Fetch Parent Comment via REST
+      # 🔥 获取父评论内容（只在有 parent_id 时执行）
+      - name: Fetch parent comment
         id: parent
         if: ${{ github.event.comment.parent_id != null }}
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PARENT_ID: ${{ github.event.comment.parent_id }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          API_URL="https://api.github.com/repos/${{ github.repository }}/discussions/comments/$PARENT_ID"
+          RESPONSE=$(curl -s \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repositories/${{ github.event.repository.id }}/discussions/${{ github.event.discussion.number }}/comments/$PARENT_ID")
 
-          # fetch
-          RESPONSE=$(curl -s -H "Authorization: token $GH_TOKEN" "$API_URL")
-
-          # extract
+          # 提取用户名 & 内容
           PARENT_USER=$(echo "$RESPONSE" | jq -r '.user.login')
-          RAW_BODY=$(echo "$RESPONSE" | jq -r '.body')
+          PARENT_BODY=$(echo "$RESPONSE" | jq -r '.body')
 
-          # escape HTML
-          BODY_ESCAPED=$(echo "$RAW_BODY" | awk '{gsub("\n", "<br>"); print}' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
+          # 转义
+          PARENT_BODY_ESCAPED=$(echo "$PARENT_BODY" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
 
-          echo "parent_user=$PARENT_USER" >> $GITHUB_OUTPUT
-          echo "parent_body=$BODY_ESCAPED" >> $GITHUB_OUTPUT
-
+          echo "user=$PARENT_USER" >> $GITHUB_OUTPUT
+          echo "body=$PARENT_BODY_ESCAPED" >> $GITHUB_OUTPUT
 
       - name: Prepare email HTML
         run: |
@@ -57,14 +57,16 @@ jobs:
           sed -i "s|{{COMMENT_USER}}|${{ github.event.comment.user.login }}|g" email.html
           sed -i "s|{{DISCUSSION_URL}}|${{ github.event.comment.html_url }}|g" email.html
           sed -i "s|{{BLOG_URL}}|${{ secrets.BLOG_BASE_URL }}${{ github.event.discussion.title }}|g" email.html
+          sed -i "s|{{COMMENT_USER_TYPE}}|${{ github.event.comment.user.type }}|g" email.html
+          sed -i "s|{{USER_URL}}|${{ github.event.comment.user.html_url }}|g" email.html
+          sed -i "s|{{USER_AVATAR}}|${{ github.event.comment.user.avatar_url }}|g" email.html
 
-          # 回复判断
+          # 是否为回复
           sed -i "s|{{IS_REPLY}}|${{ github.event.comment.parent_id != null }}|g" email.html
 
-          # 插入父内容（如果为空不会替换）
-          sed -i "s|{{REPLY_TO_USER}}|${{ steps.parent.outputs.parent_user }}|g" email.html
-          sed -i "s|{{REPLY_TO_BODY}}|${{ steps.parent.outputs.parent_body }}|g" email.html
-
+          # 写入父评论内容（如果不是回复则为空）
+          sed -i "s|{{REPLY_TO_USER}}|${{ steps.parent.outputs.user }}|g" email.html
+          sed -i "s|{{REPLY_TO_BODY}}|${{ steps.parent.outputs.body }}|g" email.html
 
       - name: Send email
         uses: dawidd6/action-send-mail@v3
