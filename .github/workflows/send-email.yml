@@ -24,25 +24,40 @@ jobs:
           COMMENT_BODY=$(echo '${{ github.event.comment.body }}' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
           echo "comment_body=$COMMENT_BODY" >> $GITHUB_OUTPUT
 
-      # 🔥 获取父评论内容（如果存在）
-      - name: Fetch parent comment if reply
-        id: parent
-        if: ${{ github.event.comment.parent_id != null }}
+      - name: Prepare All Comment Data
+        id: data
+        env:
+          # 使用内置的 GITHUB_TOKEN
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PARENT_ID: ${{ github.event.comment.parent_id }}
         run: |
-          RESPONSE=$(curl -s \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repositories/${{ github.event.repository.id }}/discussions/${{ github.event.discussion.number }}/comments/${{ github.event.comment.parent_id }}")
+          # 1. 转义当前评论内容，并替换换行符为 <br>
+          COMMENT_BODY=$(echo '${{ github.event.comment.body }}' | awk '{gsub("\n", "<br>"); print}' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
+          
+          # 2. 初始化默认值（非回复情况）
+          STATUS_TEXT="否 (新评论)"
+          PARENT_USER_OUT=""
+          PARENT_BODY_OUT=""
 
-          # 提取字段
-          PARENT_BODY=$(echo "$RESPONSE" | jq -r '.body')
-          PARENT_USER=$(echo "$RESPONSE" | jq -r '.user.login')
-
-          # 转义 HTML
-          PARENT_BODY_ESCAPED=$(echo "$PARENT_BODY" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
-
-          echo "body=$PARENT_BODY_ESCAPED" >> $GITHUB_OUTPUT
-          echo "user=$PARENT_USER" >> $GITHUB_OUTPUT
+          # 3. 如果是回复，则调用 API 获取父评论内容
+          if [ -n "$PARENT_ID" ]; then
+              STATUS_TEXT="是 (回复)"
+              
+              # 使用 gh CLI + GraphQL (比 curl 更简洁可靠)
+              API_RESPONSE=$(gh api graphql -f id="$PARENT_ID" -f query='query($id: ID!) { node(id: $id) { ... on DiscussionComment { author { login } body } } }')
+              
+              PARENT_USER_OUT=$(echo "$API_RESPONSE" | jq -r '.data.node.author.login')
+              RAW_BODY=$(echo "$API_RESPONSE" | jq -r '.data.node.body')
+              
+              # 转义父评论内容
+              PARENT_BODY_OUT=$(echo "$RAW_BODY" | awk '{gsub("\n", "<br>"); print}' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
+          fi
+          
+          # 4. 导出所有变量 (FIXED: 确保所有变量无论如何都导出)
+          echo "comment_body=$COMMENT_BODY" >> $GITHUB_OUTPUT
+          echo "reply_status=$STATUS_TEXT" >> $GITHUB_OUTPUT
+          echo "parent_user=$PARENT_USER_OUT" >> $GITHUB_OUTPUT
+          echo "parent_body=$PARENT_BODY_OUT" >> $GITHUB_OUTPUT
 
       - name: Prepare email HTML
         run: |
