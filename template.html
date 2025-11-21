@@ -4,82 +4,131 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>新评论通知</title>
+    <!-- 基础样式，确保在不同客户端兼容 -->
     <style>
         body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
         table, td { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
         img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; }
         
+        /* Reply block style */
+        .reply-block {
+            border-left: 3px solid #e1e4e8;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            background-color: #fcfcfc;
+        }
+
         @media only screen and (max-width: 480px) {
             .container { width: 100% !important; padding: 20px !important; }
-            .btn { display: block !important; width: 100% !important; text-align: center !important; margin-bottom: 10px !important; }
-            .spacer { height: 20px !important; }
+            .btn-group { display: block !important; width: 100% !important; text-align: center !important; }
+            .btn { display: block !important; width: 100% !important; text-align: center !important; margin-right: 0 !important; margin-bottom: 10px !important; }
         }
     </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f2f3f5; font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333333;">
+<body style="margin: 0; padding: 0; background-color: #f7f7f7; font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333333;">
 
-    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f2f3f5;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f7f7f7;">
         <tr>
             <td align="center" style="padding: 40px 0;">
                 
-                <table border="0" cellpadding="0" cellspacing="0" width="600" class="container" style="background-color: #ffffff; width: 600px; max-width: 100%; border: 1px solid #e1e4e8;">
+                <table border="0" cellpadding="0" cellspacing="0" width="600" class="container" style="background-color: #ffffff; width: 600px; max-width: 100%; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                     
                     <tr>
                         <td height="4" style="background-color: #4285f4; font-size: 0; line-height: 0;">&nbsp;</td>
                     </tr>
 
-                    <!-- 🔹 新增头像展示 -->
+                    <!-- 头像与用户信息 -->
                     <tr>
                         <td style="padding: 30px 40px 0 40px; text-align: left;">
-                            <img src="{{USER_AVATAR}}" width="40" height="40" style="border-radius: 50%;">
+                            <!-- 使用 flex-like structure for user info -->
+                            <table border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="50" valign="top">
+                                        <img src="{{USER_AVATAR}}" width="40" height="40" style="border-radius: 50%; display: block;">
+                                    </td>
+                                    <td valign="top" style="padding-left: 10px;">
+                                        <p style="margin: 0; font-size: 16px; font-weight: 600; color: #111111;">
+                                            <a href="{{USER_URL}}" style="color: #4285f4; text-decoration: none;">
+                                                {{COMMENT_USER}}
+                                            </a>
+                                        </p>
+                                        <p style="margin: 4px 0 0 0; font-size: 13px; color: #666666;">
+                                            {{COMMENT_USER_TYPE}} 
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
                         </td>
                     </tr>
 
-                    <!-- 标题与元信息区 -->
+                    <!-- 标题与时间信息区 -->
                     <tr>
                         <td style="padding: 20px 40px 20px 40px;">
-                            <h1 style="margin: 0 0 12px 0; font-size: 22px; font-weight: 600; color: #111111; letter-spacing: -0.5px;">
-                                收到一条新评论
+                            <h1 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 600; color: #111111; letter-spacing: -0.5px;">
+                                博客收到新评论
                             </h1>
-
-                            <!-- 🔹 新增字段展示 -->
+                            
+                            <!-- 整合元信息 -->
                             <p style="margin: 0; font-size: 14px; color: #666666; line-height: 1.6;">
-                                来自 <strong style="color: #111111;">
-                                    <a href="{{USER_URL}}" style="color: #111111; text-decoration: none;">
-                                        {{COMMENT_USER}}
-                                    </a>
-                                </strong>
-
-                                <span style="color: #cccccc; margin: 0 8px;">|</span>
-                                类型：{{COMMENT_USER_TYPE}}
-
-                                <span style="color: #cccccc; margin: 0 8px;">|</span>
-                                回复：{{IS_REPLY}}
-
-                                <span style="color: #cccccc; margin: 0 8px;">|</span>
-                                {{BJ_TIME}}
+                                <strong>时间 (北京):</strong> {{BJ_TIME}}
+                                <span style="color: #dddddd; margin: 0 12px;">/</span>
+                                <strong>状态:</strong> <span style="font-weight: bold; color: {{REPLY_STATUS | replace: '是 (回复)', '#4285f4' | replace: '否 (新评论)', '#111111'}};">{{REPLY_STATUS}}</span>
+                                <span style="display: none;">{{IS_REPLY}}</span> <!-- 用于判断是否为回复 -->
                             </p>
                         </td>
                     </tr>
 
-                    <!-- 评论内容区 -->
+                    <!-- ⬇️ 新增：被回复内容区块 (只有在 REPLY_STATUS 为 '是 (回复)' 时，才会显示非占位符内容) ⬇️ -->
+                    <tr>
+                        <td style="padding: 0 40px 20px 40px;">
+                            <!-- 依靠 Workflow 中的逻辑来判断是否为回复，并填充 PARENT_USER/BODY 占位符。
+                                 当不是回复时，PARENT_USER/BODY 为 "--"，此区块不显示。 -->
+                            <!-- 使用 table 包裹以适应所有邮件客户端 -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="font-size: 14px; line-height: 1.6;">
+                                <tr>
+                                    <td class="reply-block" style="border-left: 3px solid #e1e4e8; padding: 12px 15px; background-color: #fcfcfc;">
+                                        <p style="margin: 0 0 8px 0; font-weight: 600; color: #555555;">
+                                            回复 <span style="color: #4285f4; text-decoration: none;">{{PARENT_USER}}</span> 的评论：
+                                        </p>
+                                        <div style="font-size: 14px; color: #888888; overflow: hidden; max-height: 60px;">
+                                            {{PARENT_BODY}}
+                                        </div>
+                                        <p style="margin: 8px 0 0 0; text-align: right;">
+                                            <!-- 使用 IS_REPLY 作为 Comment ID 的一部分进行锚点链接 -->
+                                            <a href="{{DISCUSSION_URL}}#discussion-comment-{{IS_REPLY}}" style="color: #4285f4; text-decoration: none; font-size: 12px;">
+                                                查看原评论 »
+                                            </a>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <!-- ⬆️ 新增区块结束 ⬆️ -->
+
+                    <!-- 评论内容区 (主体) -->
                     <tr>
                         <td style="padding: 0 40px;">
-                            <div style="background-color: #f8f9fa; padding: 24px; font-size: 15px; line-height: 1.8; color: #333333; word-break: break-word; text-align: left;">
+                            <div style="background-color: #f8f9fa; padding: 24px; font-size: 15px; line-height: 1.8; color: #333333; word-break: break-word; text-align: left; border-radius: 4px;">
                                 {{COMMENT_BODY}}
                             </div>
                         </td>
                     </tr>
-
+                    
                     <tr>
-                        <td style="padding: 30px 40px 40px 40px;">
-                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                        <td style="height: 20px; line-height: 20px;">&nbsp;</td>
+                    </tr>
+
+                    <!-- 按钮区 -->
+                    <tr>
+                        <td style="padding: 0 40px 40px 40px;">
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" class="btn-group">
                                 <tr>
                                     <td align="left">
-                                        <a href="{{BLOG_URL}}" target="_blank" class="btn" style="display: inline-block; padding: 12px 24px; background-color: #111111; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 500; border-radius: 2px; margin-right: 16px; border: 1px solid #111111;">
+                                        <a href="{{BLOG_URL}}" target="_blank" class="btn" style="display: inline-block; padding: 10px 20px; background-color: #111111; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 500; border-radius: 4px; margin-right: 16px; border: 1px solid #111111;">
                                             查看文章
                                         </a>
-                                        <a href="{{DISCUSSION_URL}}" target="_blank" class="btn" style="display: inline-block; padding: 12px 24px; background-color: transparent; color: #555555; text-decoration: none; font-size: 14px; font-weight: 500; border-radius: 2px; border: 1px solid #d1d5da;">
+                                        <a href="{{DISCUSSION_URL}}" target="_blank" class="btn" style="display: inline-block; padding: 10px 20px; background-color: transparent; color: #555555; text-decoration: none; font-size: 14px; font-weight: 500; border-radius: 4px; border: 1px solid #d1d5da;">
                                             回复评论
                                         </a>
                                     </td>
