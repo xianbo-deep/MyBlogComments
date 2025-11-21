@@ -7,6 +7,7 @@ on:
 jobs:
   notify:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -18,65 +19,52 @@ jobs:
           BJ_TIME=$(date -d "$UTC_TIME 8 hour" "+%Y-%m-%d %H:%M:%S")
           echo "bj=$BJ_TIME" >> $GITHUB_OUTPUT
 
-      - name: Prepare All Comment Data
-        id: data
+      - name: Escape HTML characters for comment
+        id: escape
+        run: |
+          COMMENT_BODY=$(echo '${{ github.event.comment.body }}' | awk '{gsub("\n", "<br>"); print}' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
+          echo "comment_body=$COMMENT_BODY" >> $GITHUB_OUTPUT
+
+      - name: Fetch Parent Comment via REST
+        id: parent
+        if: ${{ github.event.comment.parent_id != null }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PARENT_ID: ${{ github.event.comment.parent_id }}
         run: |
-          # 转换并转义当前评论
-          COMMENT_BODY=$(echo '${{ github.event.comment.body }}' | awk '{gsub("\n", "<br>"); print}' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
-          
-          # 默认不是回复
-          STATUS_TEXT="否 (新评论)"
-          PARENT_USER_OUT=""
-          PARENT_BODY_OUT=""
+          API_URL="https://api.github.com/repos/${{ github.repository }}/discussions/comments/$PARENT_ID"
 
-          # 如果是回复则请求父评论
-          if [ -n "$PARENT_ID" ]; then
-            STATUS_TEXT="是 (回复)"
-            
-            API_RESPONSE=$(gh api graphql -f id="$PARENT_ID" -f query='
-              query($id: ID!) {
-                node(id: $id) {
-                  ... on DiscussionComment {
-                    author { login }
-                    body
-                  }
-                }
-              }
-            ')
+          # fetch
+          RESPONSE=$(curl -s -H "Authorization: token $GH_TOKEN" "$API_URL")
 
-            PARENT_USER_OUT=$(echo "$API_RESPONSE" | jq -r '.data.node.author.login')
-            RAW_BODY=$(echo "$API_RESPONSE" | jq -r '.data.node.body')
+          # extract
+          PARENT_USER=$(echo "$RESPONSE" | jq -r '.user.login')
+          RAW_BODY=$(echo "$RESPONSE" | jq -r '.body')
 
-            PARENT_BODY_OUT=$(echo "$RAW_BODY" | awk '{gsub("\n", "<br>"); print}' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
-          fi
+          # escape HTML
+          BODY_ESCAPED=$(echo "$RAW_BODY" | awk '{gsub("\n", "<br>"); print}' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
 
-          echo "comment_body=$COMMENT_BODY" >> $GITHUB_OUTPUT
-          echo "reply_status=$STATUS_TEXT" >> $GITHUB_OUTPUT
-          echo "parent_user=$PARENT_USER_OUT" >> $GITHUB_OUTPUT
-          echo "parent_body=$PARENT_BODY_OUT" >> $GITHUB_OUTPUT
+          echo "parent_user=$PARENT_USER" >> $GITHUB_OUTPUT
+          echo "parent_body=$BODY_ESCAPED" >> $GITHUB_OUTPUT
+
 
       - name: Prepare email HTML
         run: |
           cp $GITHUB_WORKSPACE/template.html email.html
 
           sed -i "s|{{BJ_TIME}}|${{ steps.time.outputs.bj }}|g" email.html
-          sed -i "s|{{COMMENT_BODY}}|${{ steps.data.outputs.comment_body }}|g" email.html
+          sed -i "s|{{COMMENT_BODY}}|${{ steps.escape.outputs.comment_body }}|g" email.html
           sed -i "s|{{COMMENT_USER}}|${{ github.event.comment.user.login }}|g" email.html
           sed -i "s|{{DISCUSSION_URL}}|${{ github.event.comment.html_url }}|g" email.html
           sed -i "s|{{BLOG_URL}}|${{ secrets.BLOG_BASE_URL }}${{ github.event.discussion.title }}|g" email.html
-          sed -i "s|{{COMMENT_USER_TYPE}}|${{ github.event.comment.user.type }}|g" email.html
-          sed -i "s|{{USER_URL}}|${{ github.event.comment.user.html_url }}|g" email.html
-          sed -i "s|{{USER_AVATAR}}|${{ github.event.comment.user.avatar_url }}|g" email.html
 
-          # 是否为回复
+          # 回复判断
           sed -i "s|{{IS_REPLY}}|${{ github.event.comment.parent_id != null }}|g" email.html
 
-          # 插入父评论内容（改成 data.outputs）
-          sed -i "s|{{REPLY_TO_USER}}|${{ steps.data.outputs.parent_user }}|g" email.html
-          sed -i "s|{{REPLY_TO_BODY}}|${{ steps.data.outputs.parent_body }}|g" email.html
+          # 插入父内容（如果为空不会替换）
+          sed -i "s|{{REPLY_TO_USER}}|${{ steps.parent.outputs.parent_user }}|g" email.html
+          sed -i "s|{{REPLY_TO_BODY}}|${{ steps.parent.outputs.parent_body }}|g" email.html
+
 
       - name: Send email
         uses: dawidd6/action-send-mail@v3
