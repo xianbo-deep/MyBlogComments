@@ -34,13 +34,13 @@ jobs:
           COMMENT_BODY=$(echo '${{ github.event.comment.body }}' | awk '{gsub("\n", "<br>"); print}' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
           
           # 2. 初始化默认值（非回复情况）
-          STATUS_TEXT="否 (新评论)"
+          STATUS_TEXT="新的评论"
           REPLY_TO_USER_OUT=""
           REPLY_TO_BODY_OUT=""
 
           # 3. 如果是回复，使用 curl 获取父评论内容
           if [ -n "$PARENT_ID" ]; then
-              STATUS_TEXT="是 (回复)"
+              STATUS_TEXT="新的回复"
               
               # 🔥 修复：使用 curl 调用 GitHub GraphQL API 来查询 Node ID (PARENT_ID)
               QUERY='{"query": "query($id: ID!) { node(id: $id) { ... on DiscussionComment { author { login } body } } }", "variables": {"id": "'$PARENT_ID'"}}'
@@ -61,7 +61,6 @@ jobs:
                   # 如果获取失败（通常是权限或 API 问题），保留空值
                   REPLY_TO_USER_OUT=""
                   REPLY_TO_BODY_OUT=""
-                  STATUS_TEXT="是 (回复 - 获取失败)"
               else
                   # 成功获取，转义父评论内容 (替换换行符为 <br>)
                   REPLY_TO_BODY_OUT=$(echo "$RAW_BODY" | awk '{gsub("\n", "<br>"); print}' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g')
