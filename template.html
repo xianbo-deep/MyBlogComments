@@ -14,7 +14,6 @@
         .reply-block {
             border-left: 3px solid #e1e4e8;
             padding: 12px 15px;
-            /* No margin-bottom here, added padding later */
             background-color: #fcfcfc;
         }
 
@@ -79,13 +78,35 @@
                     </tr>
 
                     <!-- ⬇️ 被回复内容区块 ⬇️ -->
-                    <!-- 整个区块由 Workflow 构造并插入，如果不是回复，则插入空字符串 -->
-                    {{REPLY_BLOCK_SECTION}}
+                    <!-- 整个表格区块根据 {{REPLY_DISPLAY_STYLE}} 隐藏或显示 -->
+                    <tr>
+                        <td style="padding: 0 40px; {{REPLY_DISPLAY_STYLE}}">
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
+                                <tr>
+                                    <td class="reply-block" style="border-left: 3px solid #e1e4e8; padding: 12px 15px; background-color: #fcfcfc;">
+                                        <p style="margin: 0 0 8px 0; font-weight: 600; color: #555555;">
+                                            回复 <span style="color: #4285f4; text-decoration: none;">{{REPLY_TO_USER}}</span> 的评论：
+                                        </p>
+                                        <div style="font-size: 14px; color: #888888; overflow: hidden; max-height: 60px;">
+                                            {{REPLY_TO_BODY}}
+                                        </div>
+                                        <p style="margin: 8px 0 0 0; text-align: right;">
+                                            <a href="{{DISCUSSION_URL}}#discussion-comment-{{IS_REPLY}}" style="color: #4285f4; text-decoration: none; font-size: 12px;">
+                                                查看原评论 »
+                                            </a>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
                     <!-- ⬆️ 被回复内容区块结束 ⬆️ -->
 
                     <!-- 评论内容区 (主体) -->
                     <tr>
                         <td style="padding: 0 40px;">
+                            <!-- 用于在非回复时提供必要的 20px 间距 -->
+                            <div style="height: {{MARGIN_HEIGHT}}; line-height: {{MARGIN_HEIGHT}};">&nbsp;</div>
                             <div style="background-color: #f8f9fa; padding: 24px; font-size: 15px; line-height: 1.8; color: #333333; word-break: break-word; text-align: left; border-radius: 4px;">
                                 {{COMMENT_BODY}}
                             </div>
