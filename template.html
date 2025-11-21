@@ -71,7 +71,7 @@
                             <p style="margin: 0; font-size: 14px; color: #666666; line-height: 1.6;">
                                 <strong>时间:</strong> {{BJ_TIME}}
                                 <span style="color: #dddddd; margin: 0 12px;">/</span>
-                                <strong>是否为回复:</strong> <span style="font-weight: bold; color: {{REPLY_STATUS | replace: '是', '#4285f4' | replace: '否 (新评论)', '#111111'}};">{{REPLY_STATUS}}</span>
+                                <strong>评论类型:</strong> <span style="font-weight: bold; color: {{REPLY_STATUS | replace: '新的回复', '#4285f4' | replace: '新的评论', '#111111'}};">{{REPLY_STATUS}}</span>
                                 <span style="display: none;">{{IS_REPLY}}</span> <!-- 用于判断是否为回复 -->
                             </p>
                         </td>
