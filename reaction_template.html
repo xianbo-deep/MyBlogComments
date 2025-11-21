@@ -1,1 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新评论/回应通知</title>
+    <style type="text/css">
+        /* 基础重置 */
+        body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+        table { border-collapse: collapse !important; }
+        body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
+        
+        /* 响应式样式 */
+        @media screen and (max-width: 600px) {
+            .container { width: 100% !important; }
+            .content-padding { padding-left: 20px !important; padding-right: 20px !important; }
+            .mobile-stack { display: block !important; width: 100% !important; }
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f6f8; font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;">
 
+    <!-- 外部背景 -->
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f4f6f8;">
+        <tr>
+            <td align="center" style="padding: 40px 10px;">
+                
+                <!-- 主卡片容器 -->
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                    
+                    <!-- 1. 鲜明的顶部品牌栏 (Giscus Notification) -->
+                    <tr>
+                        <!-- 修改：背景色改为蓝色 #4285f4，增加内边距 -->
+                        <td align="center" style="background-color: #4285f4; padding: 20px;">
+                            <!-- 修改：字号加大到 18px，字重加粗 -->
+                            <span style="color: #ffffff; font-size: 18px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+                                Giscus Notification
+                            </span>
+                        </td>
+                    </tr>
+                    <!-- 装饰性蓝条 -->
+                    <tr>
+                        <td height="4" style="background: linear-gradient(90deg, #4285f4, #34a853, #fbbc05, #ea4335);"></td>
+                    </tr>
+
+                    <!-- 2. 用户与 Reaction 信息 -->
+                    <tr>
+                        <td class="content-padding" style="padding: 30px 30px 0 30px;">
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td width="56" valign="top" style="padding-right: 16px;">
+                                        <img src="{{REACTION_AVATAR}}" alt="Avatar" width="56" height="56" style="border-radius: 50%; display: block; border: 2px solid #f1f3f4;">
+                                    </td>
+                                    <td valign="middle">
+                                        <div style="font-size: 18px; font-weight: 700; color: #202124; margin-bottom: 4px;">
+                                            {{REACTION_USER}}
+                                        </div>
+                                        <div style="font-size: 14px; color: #5f6368;">
+                                            添加了回应 <span style="background-color: #e8f0fe; color: #1967d2; padding: 2px 8px; border-radius: 12px; font-weight: 600; font-size: 12px;">{{REACTION_TYPE}}</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- 间隔 -->
+                    <tr><td height="20"></td></tr>
+
+                    <!-- 3. 目标内容区域 (根据你的 Workflow 变量) -->
+                    <tr>
+                        <td class="content-padding" style="padding: 0 30px;">
+                            <div style="font-size: 12px; font-weight: 600; color: #9aa0a6; margin-bottom: 8px; text-transform: uppercase;">
+                                针对以下内容
+                            </div>
+                            <!-- 引用块样式 -->
+                            <div style="background-color: #f8f9fa; border-left: 4px solid #4285f4; padding: 16px 20px; border-radius: 0 8px 8px 0;">
+                                <!-- 如果是针对评论，显示 Target User -->
+                                <div style="font-size: 12px; color: #5f6368; margin-bottom: 6px; font-weight: 500;">
+                                    {{TARGET_USER}}
+                                </div>
+                                <!-- 内容主体 -->
+                                <div style="font-size: 15px; line-height: 1.6; color: #3c4043; font-family: 'Menlo', 'Monaco', Courier, monospace, sans-serif;">
+                                    {{TARGET_CONTENT}}
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- 间隔 -->
+                    <tr><td height="30"></td></tr>
+
+                    <!-- 4. 按钮区域 -->
+                    <tr>
+                        <td class="content-padding" style="padding: 0 30px 30px 30px;">
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{TARGET_URL}}" target="_blank" style="display: inline-block; min-width: 180px; background-color: #1a73e8; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-size: 15px; font-weight: 600; text-align: center; box-shadow: 0 2px 6px rgba(26, 115, 232, 0.3);">
+                                            查看详情 / 回复
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- 5. 底部链接 -->
+                    <tr>
+                        <td class="content-padding" style="padding: 0 30px 20px 30px; border-top: 1px solid #f1f3f4;">
+                            <div style="padding-top: 16px; font-size: 12px; color: #9aa0a6; text-align: center; line-height: 1.5;">
+                                原始链接：<a href="{{TARGET_URL}}" style="color: #9aa0a6; text-decoration: underline;">{{TARGET_URL}}</a>
+                            </div>
+                        </td>
+                    </tr>
+
+                </table>
+
+                <!-- 6. 底部版权 (你要求的样式) -->
+                <div style="margin-top: 24px; font-size: 12px; color: #bdc1c6; text-align: center;">
+                    © {{YEAR}} xbzhong.cn
+                </div>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>
