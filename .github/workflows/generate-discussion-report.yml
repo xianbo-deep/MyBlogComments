@@ -5,7 +5,10 @@ on:
     # 每周一 UTC 00:00 (北京时间 08:00) 运行
     - cron: '0 0 * * 1'
   workflow_dispatch: # 允许手动点按钮触发
-  
+permissions:
+  contents: read
+  discussions: read
+
 jobs:
   build-and-send:
     runs-on: ubuntu-latest
