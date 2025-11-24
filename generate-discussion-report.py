@@ -91,9 +91,6 @@ def process_data(data, start_date, end_date):
     new_replies = []
     new_reactions = []
     
-    # 统计计数器
-    stat_new_discussions = 0
-    
     discussions = data['data']['repository']['discussions']['nodes']
     
     for disc in discussions:
@@ -103,10 +100,7 @@ def process_data(data, start_date, end_date):
         article_link = BASE_URL + disc['title']
         article_title = disc['title']
         
-        # 1. 统计新讨论 (根据创建时间)
-        disc_created_at = parse_time(disc['createdAt'])
-        if start_date <= disc_created_at <= end_date:
-            stat_new_discussions += 1
+        # 1. 不再统计新讨论 (stat_new_discussions 已移除)
 
         # 2. 处理针对“文章”的回应 (Reactions on Discussion)
         for react in disc['reactions']['nodes']:
@@ -180,9 +174,6 @@ def process_data(data, start_date, end_date):
                     
     # 汇总统计数据
     stats = {
-        "STAT_NEW_DISCUSSIONS": stat_new_discussions,
-        "STAT_TOTAL_COMMENTS": len(new_comments) + len(new_replies),
-        "STAT_TOTAL_REACTIONS": len(new_reactions),
         "NEW_COMMENT_COUNT": len(new_comments),
         "NEW_REPLY_COUNT": len(new_replies),
         "NEW_REACTION_COUNT": len(new_reactions)
