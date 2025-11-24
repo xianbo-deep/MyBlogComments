@@ -95,10 +95,8 @@ def process_data(data, start_date, end_date):
     
     for disc in discussions:
         # 构建文章链接 (根据你的要求：BASE_URL + Title)
-        # 假设 disc['title'] 是 slug，例如 "my-post"
-        # 如果 disc['title'] 是中文标题，请确保 URL 编码或你的博客支持中文路径
         article_link = BASE_URL + disc['title']
-        article_title = disc['title']
+        article_title = BASE_URL + disc['title']
         
         # 1. 不再统计新讨论 (stat_new_discussions 已移除)
 
@@ -148,7 +146,6 @@ def process_data(data, start_date, end_date):
                         "REACTION_TIMESTAMP": r_time.strftime("%m-%d"),
                         "REACTION_EMOJI": EMOJI_MAP.get(react['content'], "❤️"),
                         "TARGET_TYPE_LABEL": "评论",
-                        # 评论的回应，Target Title 统一取文章标题，或者你可以改成 "评论摘要"
                         "TARGET_TITLE": article_title, 
                         "TARGET_LINK": article_link
                     })
@@ -157,8 +154,9 @@ def process_data(data, start_date, end_date):
             for reply in comment['replies']['nodes']:
                 r_time = parse_time(reply['createdAt'])
                 if start_date <= r_time <= end_date:
-                    # 父评论预览
-                    parent_snippet = comment['body'][:50].replace("\n", " ") + "..."
+                    # 父评论预览：【修改处】不再截取前50字，也不加 "..."
+                    # 将换行符替换为空格，保持引用整洁
+                    parent_snippet = comment['body'].replace("\n", " ")
                     
                     new_replies.append({
                         "REPLY_AUTHOR_NAME": reply['author']['login'] if reply['author'] else "Unknown",
@@ -219,7 +217,6 @@ def main():
         return
 
     # 3. 读取 HTML 模板
-    # 确保这个文件名和仓库里的文件名一致
     template_path = "./discussion-report-template.html" 
     try:
         with open(template_path, "r", encoding="utf-8") as f:
