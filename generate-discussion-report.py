@@ -137,7 +137,7 @@ def main():
 
     # 3. 读取 HTML 模板。注意：模板文件名已改回 GitHub讨论区周报模板.html
     try:
-        with open("GitHub讨论区周报模板.html", "r", encoding="utf-8") as f:
+        with open("./discussion-report-template.html", "r", encoding="utf-8") as f:
             html = f.read()
     except FileNotFoundError:
         print("Error: 找不到模板文件 'GitHub讨论区周报模板.html'。请确保文件存在！")
