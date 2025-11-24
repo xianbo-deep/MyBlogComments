@@ -1,0 +1,39 @@
+name: Weekly Discussion Summary
+
+on:
+  schedule:
+    # 每周一 UTC 00:00 (北京时间 08:00) 运行
+    - cron: '0 0 * * 1'
+  workflow_dispatch: # 允许手动点按钮触发
+  
+jobs:
+  build-and-send:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          
+      - name: Generate Report (HTML)
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          REPO_OWNER: 'xbzhong-deep'  # 请修改为你的用户名/组织名
+          REPO_NAME: 'MyBlogComments'  # 请修改为你的仓库名
+        run: python generate_report.py
+
+      - name: Send email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.qq.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "博客评论区周报"
+          to: "2396768163@qq.com"
+          from: "Github Action <${{ secrets.MAIL_USERNAME }}>"
+          html_body: file://email.html
