@@ -13,12 +13,11 @@
     /* --- 移动端适配 --- */
     @media only screen and (max-width: 600px) {
       .main-card { width: 100% !important; border-radius: 0 !important; margin-top: 0 !important; box-shadow: none !important; }
-      .content-padding { padding: 20px 16px !important; } /* 增加左右边距舒适度 */
-      .avatar-col { width: 44px !important; } /* 稍微缩小头像列宽适配手机 */
+      .content-padding { padding: 20px 16px !important; }
+      .avatar-col { width: 44px !important; }
       .avatar-img { width: 32px !important; height: 32px !important; }
       .stats-col { display: block !important; width: 100% !important; margin-bottom: 10px !important; border-right: none !important; border-bottom: 1px solid #e1e4e8; }
       .stats-col:last-child { border-bottom: none; }
-      .mobile-block { display: block !important; margin-top: 4px; } /* 强制换行优化 */
     }
   </style>
 </head>
@@ -50,30 +49,31 @@
         <!-- 日期范围 -->
         <tr>
           <td class="content-padding" style="padding: 20px 32px 10px 32px; text-align: center;">
+            <div style="margin-bottom: 5px; font-size: 12px; color: #586069;">统计时间</div>
             <div style="background-color: #f1f8ff; border: 1px solid #c8e1ff; color: #0366d6; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 100px; display: inline-block;">
               {{DATE_START}} ~ {{DATE_END}}
             </div>
           </td>
         </tr>
 
-        <!-- ================= 数据概览 Dashboard ================= -->
+        <!-- ================= 数据概览 ================= -->
         <tr>
           <td class="content-padding" style="padding: 16px 32px 10px 32px;">
             <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #fafbfc; border: 1px solid #e1e4e8; border-radius: 8px;">
               <tr>
-                <!-- 统计项 1 -->
+                <!-- 统计项 1: 新评论 -->
                 <td class="stats-col" width="33%" style="padding: 12px 0; text-align: center; border-right: 1px solid #e1e4e8;">
-                  <div style="font-size: 20px; font-weight: 600; color: #24292e; line-height: 1.2;">{{STAT_NEW_DISCUSSIONS}}</div>
-                  <div style="font-size: 11px; color: #586069; margin-top: 4px;">新增讨论</div>
+                  <div style="font-size: 20px; font-weight: 600; color: #24292e; line-height: 1.2;">{{NEW_COMMENT_COUNT}}</div>
+                  <div style="font-size: 11px; color: #586069; margin-top: 4px;">新评论</div>
                 </td>
-                <!-- 统计项 2 -->
+                <!-- 统计项 2: 新回复 -->
                 <td class="stats-col" width="33%" style="padding: 12px 0; text-align: center; border-right: 1px solid #e1e4e8;">
-                  <div style="font-size: 20px; font-weight: 600; color: #0366d6; line-height: 1.2;">{{STAT_TOTAL_COMMENTS}}</div>
-                  <div style="font-size: 11px; color: #586069; margin-top: 4px;">新评论/回复</div>
+                  <div style="font-size: 20px; font-weight: 600; color: #6f42c1; line-height: 1.2;">{{NEW_REPLY_COUNT}}</div>
+                  <div style="font-size: 11px; color: #586069; margin-top: 4px;">新回复</div>
                 </td>
-                <!-- 统计项 3 -->
+                <!-- 统计项 3: 新回应 -->
                 <td class="stats-col" width="33%" style="padding: 12px 0; text-align: center;">
-                  <div style="font-size: 20px; font-weight: 600; color: #d73a49; line-height: 1.2;">{{STAT_TOTAL_REACTIONS}}</div>
+                  <div style="font-size: 20px; font-weight: 600; color: #d73a49; line-height: 1.2;">{{NEW_REACTION_COUNT}}</div>
                   <div style="font-size: 11px; color: #586069; margin-top: 4px;">新回应</div>
                 </td>
               </tr>
@@ -141,9 +141,18 @@
                     <span style="font-size: 12px; color: #6a737d; margin-left: 4px;">{{REPLY_TIMESTAMP}}</span>
                   </div>
                   
-                  <!-- 父评论引用 (样式优化) -->
-                  <div style="margin-bottom: 8px; border-left: 3px solid #e1e4e8; padding: 4px 0 4px 8px; background-color: #fafbfc; color: #586069; font-size: 12px; border-radius: 0 4px 4px 0;">
-                    回复 @{{PARENT_AUTHOR_NAME}}: {{PARENT_COMMENT_SNIPPET}}
+                  <!-- 父评论引用 -->
+                  <div style="margin-bottom: 8px; background-color: #fafbfc; border: 1px solid #e1e4e8; border-radius: 6px; padding: 8px;">
+                    <table cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td valign="top" width="24" style="width: 24px;">
+                          <img src="{{PARENT_AUTHOR_AVATAR}}" width="16" height="16" style="border-radius: 50%; display: block; margin-top: 2px;">
+                        </td>
+                        <td valign="top" style="font-size: 12px; color: #586069; line-height: 1.4;">
+                           <strong style="color: #24292e;">{{PARENT_AUTHOR_NAME}}</strong>: {{PARENT_COMMENT_SNIPPET}}
+                        </td>
+                      </tr>
+                    </table>
                   </div>
                   
                   <div style="font-size: 14px; line-height: 1.6; color: #24292e; margin-bottom: 8px;">
@@ -161,7 +170,7 @@
         <!-- {{REPLY_LOOP_END}} -->
 
 
-        <!-- ================= 区域 3: 新回应 (Reactions) 手机端优化版 ================= -->
+        <!-- ================= 区域 3: 新回应 (Reactions) ================= -->
         <tr>
           <td class="content-padding" style="padding: 10px 32px 0 32px;">
              <h2 style="margin: 20px 0 15px 0; font-size: 15px; font-weight: 600; color: #24292e; border-left: 3px solid #d73a49; padding-left: 10px; line-height: 1.2;">
@@ -178,34 +187,25 @@
                 <td valign="top" width="40" class="avatar-col" style="width: 40px; padding-right: 10px;">
                   <img src="{{REACTOR_AVATAR}}" alt="头像" class="avatar-img" width="32" height="32" style="border-radius: 50%; background-color: #e1e4e8; display: block;">
                 </td>
-                <td valign="top"> <!-- 修改为 top 对齐，防止文字多时头像跑偏 -->
-                  <!-- 第一行：人名 + 时间 -->
+                <td valign="top">
                   <div style="font-size: 13px; line-height: 1.4; color: #586069; margin-bottom: 4px;">
                     <strong style="color: #24292e; font-weight: 600;">{{REACTOR_NAME}}</strong>
                     <span style="font-size: 12px; color: #959da5; float: right;">{{REACTION_TIMESTAMP}}</span>
                   </div>
                   
-                  <!-- 第二行：动作 + 对象 -->
-                  <div style="font-size: 13px; line-height: 1.5; color: #24292e; background-color: #fafbfc; border: 1px solid #f0f3f6; border-radius: 6px; padding: 8px;">
-                    <div style="display: flex; align-items: center;">
-                       <!-- 表情 -->
-                       <span style="font-size: 16px; margin-right: 6px;">{{REACTION_EMOJI}}</span>
-                       <!-- 标签：文章/评论 -->
-                       <span style="font-size: 10px; color: #586069; border: 1px solid #e1e4e8; border-radius: 3px; padding: 1px 4px; margin-right: 6px; white-space: nowrap; background-color: #fff;">
-                         {{TARGET_TYPE_LABEL}}
-                       </span>
-                    </div>
-                    <!-- 标题/内容摘要 -->
-                    <div style="margin-top: 4px;">
-                       <a href="{{TARGET_LINK}}" style="color: #0366d6; text-decoration: none; font-weight: 500; display: block;">
-                         {{TARGET_TITLE}}
-                       </a>
-                    </div>
+                  <!-- 修改后的句子结构：于 [Target] 送出了 [Emoji] 回应 -->
+                  <div style="font-size: 13px; line-height: 1.5; color: #24292e; background-color: #fafbfc; border: 1px solid #f0f3f6; border-radius: 6px; padding: 10px;">
+                    <span style="color: #586069;">于</span>
+                    <a href="{{TARGET_LINK}}" style="color: #0366d6; text-decoration: none; font-weight: 500; margin: 0 2px;">
+                      {{TARGET_TITLE}}
+                    </a>
+                    <span style="color: #586069;">送出了</span>
+                    <span style="font-size: 16px; margin: 0 2px; vertical-align: -2px;">{{REACTION_EMOJI}}</span>
+                    <span style="color: #586069;">回应</span>
                   </div>
                 </td>
               </tr>
             </table>
-            <!-- 隐形分隔，不使用横线减少视觉杂乱 -->
             <div style="height: 12px;"></div>
           </td>
         </tr>
